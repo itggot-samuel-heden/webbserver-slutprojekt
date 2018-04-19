@@ -1,5 +1,6 @@
 class App < Sinatra::Base
 	enable :sessions
+	db = SQLite3::Database.open("./database/database.db")
 	
 	def auto_redirect()
 		if session[:user_id] == nil
@@ -22,9 +23,13 @@ class App < Sinatra::Base
 		slim(:main, locals:{current_user:current_user})
 	end
 
-	post '/login' do
-		
-	end
+	#post '/login' do
+	#	if session[:user_id] = nil
+	#		redirect('/')
+	#	end
+	#	username = params["username"]
+	#	password = params["password"]
+	#end
 
 	get '/register' do
 		if session[:user_id] = nil
