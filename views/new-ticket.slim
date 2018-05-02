@@ -1,0 +1,14 @@
+h2 Get a Ticket for any ride!!!
+
+form action="/user/#{session[:user_id]}/tickets/new" method="POST"
+    select name="attraction"
+        - get_all_rides.each do |ride|
+            option value="#{ride['id']}" = ride["name"]
+    input type="submit" value="Get Ticket"
+
+h2 Get a Ticket for your ridesz!!!
+form action="/user/#{session[:user_id]}/tickets/new" method="POST"
+    select name="attraction"
+        - get_user_rides(session[:user_id]).each do |ride|
+            option value="#{ride['id']}" = ride["name"]
+    input type="submit" value="Get Ticket"

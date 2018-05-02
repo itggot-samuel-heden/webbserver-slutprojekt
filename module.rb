@@ -19,22 +19,61 @@ module TodoDB
 
     def login_info(username)
         db = connect()
-        result = db.execute("SELECT * FROM user WHERE username = ?", username)
+        result = db.execute("SELECT * FROM User WHERE username = ?", username)
+        return result.first
+    end
+
+    def login_info_by_id(user_id)
+        db = connect()
+        result = db.execute("SELECT * FROM User WHERE id = ?", user_id)
+        return result.first
+    end
+
+    def edit_user(user_id, username, height, age)
+        db = connect()
+        result = db.execute("UPDATE User SET username = ?, height = ?, age = ? WHERE id = ?", username, height, age, user_id)
         return result
     end
 
-    def verify_permission(id:,attraction_id:)
+    def get_all_rides
         db = connect()
-        user_data = db.execute("SELECT height,age FROM User WHERE id=?", id)
-        attraction_data = db.execute("SELECT height_restriction, age_restriction FROM Attraction WHERE attraction_id=?", attraction_id)
-        result = db.execute("SELECT * FROM Ride_permission WHERE user_id=? AND attraction_id=?", [id,attraction_id])
+        result = db.execute("SELECT * FROM Attraction")
+        return result
+    end
+
+    def get_ride(ride_id)
+        db = connect()
+        result = db.execute("SELECT * FROM Attraction WHERE id = ?", ride_id)
+        return result.first
+    end
+
+    def get_user_rides(user_id)
+        user = login_info_by_id(user_id)
+        rides = get_all_rides
+        user_rides = []
         
-        if user_data[0] && user_data[1] >= attraction_data[0] && attraction_data[2]
-            db.execute("INSERT INTO Ride_permission(permission_status) VALUES(?)", [0])
-        else
-            db.execute("INSERT INTO Ride_permission(permission_status) VALUES(?)", [1])
+        rides.each do |ride|
+            if ride["height_restriction"].to_i <= user["height"].to_i && ride["age_restriction"].to_i <= user["age"].to_i
+                user_rides << ride
+            end
         end
 
+        return user_rides
+    end
+
+    def create_ticket(user_id, ride_id, car_nr)
+        db = connect()
+        db.execute("INSERT INTO Tickets (attraction_id, car_nr, user_id) VALUES (?,?,?)", ride_id, car_nr, user_id)
+    end
+
+    def get_user_tickets(user_id)
+        db = connect()
+        result = db.execute("SELECT * FROM Tickets WHERE user_id = ?", user_id)
         return result
+    end
+
+    def delete_ticket(ticket_id)
+        db = connect()
+        db.execute("DELETE FROM Tickets WHERE id = ?", ticket_id)
     end
 end

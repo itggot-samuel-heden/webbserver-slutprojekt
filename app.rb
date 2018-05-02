@@ -2,8 +2,7 @@ require_relative './module.rb'
 
 class App < Sinatra::Base
 	enable :sessions
-	db = SQLite3::Database.open("./database/database.sqlite")
-
+	set :session_secret, "Tjena"
 	include TodoDB
 	
 	def auto_redirect()
@@ -13,33 +12,29 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		"Welcome to Rydez!"
-		session[:user_id] == nil
-		slim(:index)
-	end
-
-	get '/main' do
-		if session[:user_id] == nil
-			redirect('/')
+		if session[:user_id].nil?
+			slim(:index)
+		else
+			redirect("/user/#{session[:user_id]}")
 		end
-		id = session[:user_id]
-		current_user = find_user(id:session[:user_id])
-		slim(:main, locals:{current_user:current_user})
 	end
 
-	#post '/login' do
-	#	if session[:user_id] = nil
-	#		redirect('/')
-	#	end
-	#	username = params["username"]
-	#	password = params["password"]
-	#end
+	post '/login' do
+		if session[:user_id] != nil
+			redirect('/')
+		else
+			user = login_info(params[:username])
+			session[:user_id] = user["id"]
+			redirect("/user/#{session[:user_id]}")
+		end
+	end
 
 	get '/register' do
 		if session[:user_id] != nil
 			redirect('/')
+		else
+			slim(:register)
 		end
-		slim(:register)
 	end
 
 	post '/register' do
@@ -49,24 +44,87 @@ class App < Sinatra::Base
 		age = params["age"]
 
 		if username != nil
-			if login_info(username).empty? == true
+			if login_info(username).empty?
 				if params[:password]==params[:confirm]
-
-					encrypted_password = BCrypt::Password.create(password)
-					create_user(username, encrypted_password, height, age)
+					create_user(username, BCrypt::Password.create(password), height, age)
+					redirect('/')
 				end
 			end
 		else
-			error_message = "Registration failed, please try another username."
+			puts "Registration failed, please try another username."
 			redirect('/register')
 		end
-		redirect('/register')
 	end
 
-	post '/logout' do
-		session[:user_id] == nil
+	get '/logout' do
+		session[:user_id] = nil
 		auto_redirect()
 	end
 
+	get '/user/:user_id' do
+		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
+			slim(:main)
+		else
+			"ur not authorized!!1"
+		end
+	end
 
+	get '/user/:user_id/edit' do
+		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
+			slim(:"edit-user")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	post '/user/:user_id/edit' do
+		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
+			edit_user(params["user_id"], params["username"], params["height"], params["age"])
+			redirect("/user/#{params['user_id']}")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	get '/user/:user_id/tickets' do
+		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
+			slim(:"user-tickets")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	get '/user/:user_id/tickets/new' do
+		if session[:user_id] != nil
+			slim(:"new-ticket")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	post '/user/:user_id/tickets/new' do
+		if session[:user_id] != nil
+			create_ticket(session[:user_id], params["attraction"], rand(1..5))
+			redirect("/user/#{session[:user_id]}/tickets")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	post '/user/:user_id/tickets/:ticket_id/delete' do
+		if session[:user_id] != nil
+			delete_ticket(params["ticket_id"])
+			redirect("/user/#{session[:user_id]}/tickets")
+		else
+			"ur not authorized!!1"
+		end
+	end
+
+	get '/rides' do
+		slim(:rides)
+	end
+
+	get '/rides/:ride_id' do
+		slim(:ride, :locals => {:ride => get_ride(params["ride_id"])})
+	end
 end           

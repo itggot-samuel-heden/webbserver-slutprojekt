@@ -1,0 +1,11 @@
+- user = login_info_by_id(session[:user_id])
+h1 Edit your profile:
+form action="/user/#{session[:user_id]}/edit" method="POST"
+    p Username:
+    input name="username" type="text" value="#{user['username']}"
+    p Your height: (in centimeters):
+    input name="height" type="text" value="#{user['height']}"
+    p Your age: (in years)
+    input name="age" type="text" value="#{user['age']}"
+    br
+    input type="submit" value="Update"

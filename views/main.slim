@@ -1,1 +1,25 @@
-h2 class="logged_in_as" Logged in as: #{current_user}
+- user = login_info_by_id(session[:user_id])
+h2 Logged in as: #{user["username"]}
+
+a href="/user/#{session[:user_id]}/tickets" Tickets
+a href="/user/#{session[:user_id]}/edit" Edit profile
+a href="/logout" Log out
+
+table
+    tr
+        td
+            p Height:
+        td
+            p #{user["height"]} cm
+    tr
+        td
+            p Age:
+        td
+            p #{user["age"]} years
+
+h3 U mei ryde deez rydez:
+- rides = get_user_rides(session[:user_id])
+ul
+    - rides.each do |ride|
+        li
+            a href="/rides/#{ride['id']}" #{ride["name"]}
