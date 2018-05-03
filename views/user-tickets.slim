@@ -1,13 +1,13 @@
 - user = login_info_by_id(session[:user_id])
-h2 Tickets for #{user["username"]}
+h2 Ticketz 4 de user caled #{user["username"]}
 
-a href="/user/#{session[:user_id]}/tickets/new" New Ticket
+a href="/user/#{session[:user_id]}/tickets/new" New tiket
 
 - rides = []
 - get_all_rides.each {|ride| rides[ride["id"].to_i] = ride}
 ul
     - get_user_tickets(session[:user_id]).each do |ticket|
         li
-            p Rideticket for #{rides[ticket["attraction_id"]]["name"]} in car number: #{ticket["car_nr"]}
+            p Ryde tiket for #{rides[ticket["attraction_id"]]["name"]} in car number: #{ticket["car_nr"]}
             form action="/user/#{session[:user_id]}/tickets/#{ticket['id']}/delete" method="post"
-                input type="submit" value="Delete Ticket"
+                input type="submit" value="Delet tiket"

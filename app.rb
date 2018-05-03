@@ -43,13 +43,9 @@ class App < Sinatra::Base
 		height = params["height"]
 		age = params["age"]
 
-		if username != nil
-			if login_info(username).empty?
-				if params[:password]==params[:confirm]
-					create_user(username, BCrypt::Password.create(password), height, age)
-					redirect('/')
-				end
-			end
+		if username != nil && login_info(username).nil? && params[:password]==params[:confirm]
+			create_user(username, BCrypt::Password.create(password), height, age)
+			redirect('/')
 		else
 			puts "Registration failed, please try another username."
 			redirect('/register')
@@ -65,7 +61,7 @@ class App < Sinatra::Base
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
 			slim(:main)
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -73,7 +69,7 @@ class App < Sinatra::Base
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
 			slim(:"edit-user")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -82,7 +78,7 @@ class App < Sinatra::Base
 			edit_user(params["user_id"], params["username"], params["height"], params["age"])
 			redirect("/user/#{params['user_id']}")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -90,7 +86,7 @@ class App < Sinatra::Base
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
 			slim(:"user-tickets")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -98,7 +94,7 @@ class App < Sinatra::Base
 		if session[:user_id] != nil
 			slim(:"new-ticket")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -107,7 +103,7 @@ class App < Sinatra::Base
 			create_ticket(session[:user_id], params["attraction"], rand(1..5))
 			redirect("/user/#{session[:user_id]}/tickets")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 
@@ -116,7 +112,7 @@ class App < Sinatra::Base
 			delete_ticket(params["ticket_id"])
 			redirect("/user/#{session[:user_id]}/tickets")
 		else
-			"ur not authorized!!1"
+			"ur not authorized!!1 pls log in or register"
 		end
 	end
 

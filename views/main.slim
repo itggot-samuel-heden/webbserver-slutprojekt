@@ -1,9 +1,13 @@
 - user = login_info_by_id(session[:user_id])
-h2 Logged in as: #{user["username"]}
+h2 Loged in as: #{user["username"]}
 
-a href="/user/#{session[:user_id]}/tickets" Tickets
-a href="/user/#{session[:user_id]}/edit" Edit profile
+a href="/user/#{session[:user_id]}/tickets" Quik pas tiketz
+br
+a href="/user/#{session[:user_id]}/edit" Edit ur profil
+br
 a href="/logout" Log out
+br
+br
 
 table
     tr
@@ -17,7 +21,7 @@ table
         td
             p #{user["age"]} years
 
-h3 U mei ryde deez rydez:
+h3 U can rid deez rydez:
 - rides = get_user_rides(session[:user_id])
 ul
     - rides.each do |ride|
