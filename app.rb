@@ -59,7 +59,9 @@ class App < Sinatra::Base
 
 	get '/user/:user_id' do
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
-			slim(:main)
+			user = login_info_by_id(session[:user_id])
+			rides = get_user_rides(session[:user_id])
+			slim(:main, locals: {user: user, rides: rides})
 		else
 			"ur not authorized!!1 pls log in or register"
 		end
@@ -67,7 +69,8 @@ class App < Sinatra::Base
 
 	get '/user/:user_id/edit' do
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
-			slim(:"edit-user")
+			user = login_info_by_id(session[:user_id])
+			slim(:"edit-user", locals: {user: user})
 		else
 			"ur not authorized!!1 pls log in or register"
 		end
@@ -84,7 +87,11 @@ class App < Sinatra::Base
 
 	get '/user/:user_id/tickets' do
 		if session[:user_id] != nil && session[:user_id] == params["user_id"].to_i
-			slim(:"user-tickets")
+			user = login_info_by_id(session[:user_id])
+			rides = []
+			list_of_tickets = get_user_tickets(session[:user_id])
+			get_all_rides.each {|ride| rides[ride["id"].to_i] = ride}
+			slim(:"user-tickets", locals: {user: user, rides: rides, list_of_tickets: list_of_tickets})
 		else
 			"ur not authorized!!1 pls log in or register"
 		end
@@ -117,7 +124,8 @@ class App < Sinatra::Base
 	end
 
 	get '/rides' do
-		slim(:rides)
+		rides = get_all_rides
+		slim(:rides, locals:{rides:rides })
 	end
 
 	get '/rides/:ride_id' do
